@@ -1,0 +1,7 @@
+# The release namespace must carry the label pod-security.kubernetes.io/enforce: privileged,
+# because the agent runs privileged. The chart does not create the namespace.
+image:
+  repository: ghcr.io/squ94wk/patchpanel-cni
+  # Defaults to the chart's appVersion.
+  tag: ""
+  pullPolicy: IfNotPresent

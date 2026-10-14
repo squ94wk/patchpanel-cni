@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/squ94wk/dc-net-cni/internal/protocol"
+	"github.com/squ94wk/patchpanel-cni/internal/protocol"
 )
 
 type Invocation struct {

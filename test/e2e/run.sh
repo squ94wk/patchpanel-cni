@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Creates the kind cluster dcnet-e2e with multus (thick) and dc-net-cni, runs the e2e tests and always deletes the cluster.
-# The image dc-net-cni:dev must exist locally (make image). Extra arguments are passed to go test.
+# Creates the kind cluster dcnet-e2e with multus (thick) and patchpanel-cni, runs the e2e tests and always deletes the cluster. Requires helm locally.
+# The image patchpanel-cni:dev must exist locally (make image). Extra arguments are passed to go test.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
@@ -18,9 +18,12 @@ kind create cluster --name "$cluster" --wait 120s
 curl -sSfL "$multus" | sed 's#multus-cni:snapshot-thick#multus-cni:v4.3.1-thick#' | kubectl --context "$kctx" apply -f -
 
 docker pull "$tools"
-kind load docker-image dc-net-cni:dev "$tools" --name "$cluster"
+kind load docker-image patchpanel-cni:dev "$tools" --name "$cluster"
 
-kubectl --context "$kctx" apply -f deploy/crds -f deploy/rbac.yaml -f deploy/daemonset.yaml
+kubectl --context "$kctx" create namespace dcnet-system
+kubectl --context "$kctx" label namespace dcnet-system pod-security.kubernetes.io/enforce=privileged
+helm --kube-context "$kctx" install patchpanel-cni charts/patchpanel-cni -n dcnet-system \
+  --set image.repository=patchpanel-cni --set image.tag=dev --set image.pullPolicy=Never
 kubectl --context "$kctx" -n kube-system rollout status ds/kube-multus-ds --timeout=180s
 kubectl --context "$kctx" -n dcnet-system rollout status ds/dcnet-agent --timeout=180s
 

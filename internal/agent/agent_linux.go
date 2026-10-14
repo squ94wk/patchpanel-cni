@@ -14,7 +14,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/squ94wk/dc-net-cni/internal/protocol"
+	"github.com/squ94wk/patchpanel-cni/internal/protocol"
 )
 
 const (

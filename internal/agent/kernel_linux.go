@@ -10,7 +10,7 @@ import (
 	"github.com/vishvananda/netns"
 	"golang.org/x/sys/unix"
 
-	"github.com/squ94wk/dc-net-cni/internal/topo"
+	"github.com/squ94wk/patchpanel-cni/internal/topo"
 )
 
 // createPort creates the veth pair of a port: the stub stays in the park netns and

@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/squ94wk/dc-net-cni/internal/topo"
+	"github.com/squ94wk/patchpanel-cni/internal/topo"
 )
 
 const heldByOthers = "all candidates are held by other pods"

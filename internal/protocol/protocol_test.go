@@ -9,7 +9,7 @@ import (
 
 	"github.com/containernetworking/cni/pkg/types"
 
-	"github.com/squ94wk/dc-net-cni/internal/protocol"
+	"github.com/squ94wk/patchpanel-cni/internal/protocol"
 )
 
 func serve(t *testing.T, handler func(protocol.Request) protocol.Response) string {

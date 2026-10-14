@@ -6,7 +6,7 @@ import (
 
 	types100 "github.com/containernetworking/cni/pkg/types/100"
 
-	"github.com/squ94wk/dc-net-cni/internal/topo"
+	"github.com/squ94wk/patchpanel-cni/internal/topo"
 )
 
 // BuildResult returns the CNI result in cniVersion. Every interface has the sandbox set, otherwise multus drops it.

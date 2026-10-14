@@ -1,4 +1,4 @@
-IMG ?= dc-net-cni:dev
+IMG ?= patchpanel-cni:dev
 
 .PHONY: build generate lint image e2e
 
@@ -8,7 +8,7 @@ build:
 
 generate:
 	go tool controller-gen object paths=./api/... 
-	go tool controller-gen crd paths=./api/... output:crd:artifacts:config=deploy/crds
+	go tool controller-gen crd paths=./api/... output:crd:artifacts:config=charts/patchpanel-cni/templates/crds
 
 lint:
 	golangci-lint run ./...

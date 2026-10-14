@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/squ94wk/dc-net-cni/internal/topo"
+	"github.com/squ94wk/patchpanel-cni/internal/topo"
 )
 
 const twoLeaves = `

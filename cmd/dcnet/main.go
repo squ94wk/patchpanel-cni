@@ -9,7 +9,7 @@ import (
 	"github.com/containernetworking/cni/pkg/types"
 	"github.com/containernetworking/cni/pkg/version"
 
-	"github.com/squ94wk/dc-net-cni/internal/protocol"
+	"github.com/squ94wk/patchpanel-cni/internal/protocol"
 )
 
 func forward(command string, args *skel.CmdArgs) (json.RawMessage, error) {

@@ -1,4 +1,4 @@
-module github.com/squ94wk/dc-net-cni
+module github.com/squ94wk/patchpanel-cni
 
 go 1.26.5
 

@@ -18,9 +18,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
-	"github.com/squ94wk/dc-net-cni/api/v1alpha1"
-	"github.com/squ94wk/dc-net-cni/internal/agent"
-	"github.com/squ94wk/dc-net-cni/internal/protocol"
+	"github.com/squ94wk/patchpanel-cni/api/v1alpha1"
+	"github.com/squ94wk/patchpanel-cni/internal/agent"
+	"github.com/squ94wk/patchpanel-cni/internal/protocol"
 )
 
 const parkName = "dcnet-park"

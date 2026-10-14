@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/squ94wk/dc-net-cni/internal/topo"
+	"github.com/squ94wk/patchpanel-cni/internal/topo"
 )
 
 var dns1123 = regexp.MustCompile(`^[a-z0-9]([-a-z0-9]*[a-z0-9])?$`)

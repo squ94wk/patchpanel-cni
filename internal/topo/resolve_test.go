@@ -4,8 +4,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/squ94wk/dc-net-cni/api/v1alpha1"
-	"github.com/squ94wk/dc-net-cni/internal/topo"
+	"github.com/squ94wk/patchpanel-cni/api/v1alpha1"
+	"github.com/squ94wk/patchpanel-cni/internal/topo"
 )
 
 func link(ad, ai, bd, bi string) v1alpha1.Link {

@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/squ94wk/dc-net-cni/internal/agent"
+	"github.com/squ94wk/patchpanel-cni/internal/agent"
 )
 
 func TestBrokenStubs(t *testing.T) {

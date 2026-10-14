@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/squ94wk/dc-net-cni/api/v1alpha1"
+	"github.com/squ94wk/patchpanel-cni/api/v1alpha1"
 )
 
 type Endpoint struct {

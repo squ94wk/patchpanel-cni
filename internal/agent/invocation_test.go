@@ -3,8 +3,8 @@ package agent_test
 import (
 	"testing"
 
-	"github.com/squ94wk/dc-net-cni/internal/agent"
-	"github.com/squ94wk/dc-net-cni/internal/protocol"
+	"github.com/squ94wk/patchpanel-cni/internal/agent"
+	"github.com/squ94wk/patchpanel-cni/internal/protocol"
 )
 
 const podArgs = "IgnoreUnknown=1;K8S_POD_NAMESPACE=ns;K8S_POD_NAME=pod1;K8S_POD_INFRA_CONTAINER_ID=abc;K8S_POD_UID=uid1"

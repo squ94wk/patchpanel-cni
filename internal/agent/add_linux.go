@@ -14,8 +14,8 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/squ94wk/dc-net-cni/api/v1alpha1"
-	"github.com/squ94wk/dc-net-cni/internal/topo"
+	"github.com/squ94wk/patchpanel-cni/api/v1alpha1"
+	"github.com/squ94wk/patchpanel-cni/internal/topo"
 )
 
 // Add claims a device of the topology for the pod, creates its ports and wires them to the existing peers.

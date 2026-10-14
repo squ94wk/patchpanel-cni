@@ -6,8 +6,8 @@ import (
 
 	"github.com/containernetworking/cni/pkg/types/create"
 
-	"github.com/squ94wk/dc-net-cni/internal/agent"
-	"github.com/squ94wk/dc-net-cni/internal/topo"
+	"github.com/squ94wk/patchpanel-cni/internal/agent"
+	"github.com/squ94wk/patchpanel-cni/internal/topo"
 )
 
 func TestBuildResult(t *testing.T) {

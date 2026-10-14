@@ -1,0 +1,6 @@
+apiVersion: v2
+name: patchpanel-cni
+description: CNI plugin and node agent that wire pods into data center topologies
+type: application
+version: 0.0.0
+appVersion: dev
