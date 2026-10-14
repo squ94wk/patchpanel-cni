@@ -1,0 +1,79 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.22.0
+  name: deviceassociations.dcnet.squ94wk.github.io
+spec:
+  group: dcnet.squ94wk.github.io
+  names:
+    kind: DeviceAssociation
+    listKind: DeviceAssociationList
+    plural: deviceassociations
+    singular: deviceassociation
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.topology
+      name: Topology
+      type: string
+    - jsonPath: .spec.device
+      name: Device
+      type: string
+    - jsonPath: .status.nodeName
+      name: Node
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              device:
+                type: string
+              podUID:
+                type: string
+              topology:
+                type: string
+            required:
+            - device
+            - podUID
+            - topology
+            type: object
+            x-kubernetes-validations:
+            - message: spec is immutable
+              rule: self == oldSelf
+          status:
+            properties:
+              nodeName:
+                description: NodeName is empty as long as no node state exists for
+                  the association.
+                type: string
+              sandboxID:
+                type: string
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

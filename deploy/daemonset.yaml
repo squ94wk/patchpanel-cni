@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: dcnet-agent
+  namespace: dcnet-system
+spec:
+  selector:
+    matchLabels:
+      app: dcnet-agent
+  template:
+    metadata:
+      labels:
+        app: dcnet-agent
+    spec:
+      serviceAccountName: dcnet-agent
+      priorityClassName: system-node-critical
+      tolerations:
+        - operator: Exists
+      initContainers:
+        - name: install-cni
+          image: dc-net-cni:dev
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - cp /usr/local/bin/dcnet /opt/cni/bin/dcnet.tmp && mv /opt/cni/bin/dcnet.tmp /opt/cni/bin/dcnet
+          volumeMounts:
+            - name: cni-bin
+              mountPath: /opt/cni/bin
+      containers:
+        - name: agent
+          image: dc-net-cni:dev
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          securityContext:
+            privileged: true
+          volumeMounts:
+            # The park netns is pinned here, so it must be visible on the host.
+            - name: netns
+              mountPath: /run/netns
+              mountPropagation: Bidirectional
+            - name: socket
+              mountPath: /run/dcnet
+      volumes:
+        - name: cni-bin
+          hostPath:
+            path: /opt/cni/bin
+            type: DirectoryOrCreate
+        - name: netns
+          hostPath:
+            path: /run/netns
+            type: DirectoryOrCreate
+        - name: socket
+          hostPath:
+            path: /run/dcnet
+            type: DirectoryOrCreate

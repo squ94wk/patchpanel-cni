@@ -1,0 +1,19 @@
+apiVersion: dcnet.squ94wk.github.io/v1alpha1
+kind: Topology
+metadata:
+  name: lab1
+spec:
+  devices:
+    - name: leaf1
+    - name: leaf2
+    - name: server1
+      group: servers
+    - name: server2
+      group: servers
+  links:
+    - a: {device: leaf1, interface: eth1}
+      b: {device: leaf2, interface: eth1}
+    - a: {device: leaf1, interface: eth2}
+      b: {device: server1, interface: eth1}
+    - a: {device: leaf2, interface: eth2}
+      b: {device: server2, interface: eth1}

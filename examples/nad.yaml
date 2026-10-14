@@ -1,0 +1,12 @@
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: lab1
+spec:
+  config: |
+    {
+      "cniVersion": "1.0.0",
+      "name": "lab1",
+      "type": "dcnet",
+      "topology": "lab1"
+    }
