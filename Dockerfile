@@ -7,9 +7,9 @@ RUN go mod download
 COPY api ./api
 COPY cmd ./cmd
 COPY internal ./internal
-RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /out/dcnet ./cmd/dcnet \
- && CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /out/dcnet-agent ./cmd/dcnet-agent
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /out/patchpanel ./cmd/patchpanel \
+ && CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /out/patchpanel-agent ./cmd/patchpanel-agent
 
 FROM alpine:3.22
-COPY --from=build /out/dcnet /out/dcnet-agent /usr/local/bin/
-ENTRYPOINT ["/usr/local/bin/dcnet-agent"]
+COPY --from=build /out/patchpanel /out/patchpanel-agent /usr/local/bin/
+ENTRYPOINT ["/usr/local/bin/patchpanel-agent"]

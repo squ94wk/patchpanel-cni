@@ -23,7 +23,7 @@ import (
 	"github.com/squ94wk/patchpanel-cni/internal/protocol"
 )
 
-const parkName = "dcnet-park"
+const parkName = "patchpanel-park"
 
 func main() {
 	ctrl.SetLogger(zap.New())

@@ -1,4 +1,4 @@
-apiVersion: dcnet.squ94wk.github.io/v1alpha1
+apiVersion: patchpanel.squ94wk.github.io/v1alpha1
 kind: Topology
 metadata:
   name: lab1

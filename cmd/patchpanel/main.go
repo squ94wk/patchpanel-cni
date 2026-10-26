@@ -23,7 +23,7 @@ func forward(command string, args *skel.CmdArgs) (json.RawMessage, error) {
 		Stdin:       args.StdinData,
 	})
 	if err != nil {
-		return nil, types.NewError(types.ErrIOFailure, "failed to reach dcnet-agent", err.Error())
+		return nil, types.NewError(types.ErrIOFailure, "failed to reach patchpanel-agent", err.Error())
 	}
 	if resp.Error != nil {
 		return nil, resp.Error
@@ -52,5 +52,5 @@ func main() {
 			return err
 		},
 		Check: func(*skel.CmdArgs) error { return nil },
-	}, version.PluginSupports("0.3.0", "0.3.1", "0.4.0", "1.0.0", "1.1.0"), "dcnet")
+	}, version.PluginSupports("0.3.0", "0.3.1", "0.4.0", "1.0.0", "1.1.0"), "patchpanel")
 }

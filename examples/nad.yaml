@@ -7,6 +7,6 @@ spec:
     {
       "cniVersion": "1.0.0",
       "name": "lab1",
-      "type": "dcnet",
+      "type": "patchpanel",
       "topology": "lab1"
     }

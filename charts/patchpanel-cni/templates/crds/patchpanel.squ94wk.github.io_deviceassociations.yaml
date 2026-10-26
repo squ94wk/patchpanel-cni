@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.22.0
-  name: deviceassociations.dcnet.squ94wk.github.io
+  name: deviceassociations.patchpanel.squ94wk.github.io
 spec:
-  group: dcnet.squ94wk.github.io
+  group: patchpanel.squ94wk.github.io
   names:
     kind: DeviceAssociation
     listKind: DeviceAssociationList

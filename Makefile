@@ -17,6 +17,6 @@ lint:
 image:
 	docker build -t $(IMG) .
 
-# Creates the kind cluster dcnet-e2e, runs the e2e tests and deletes the cluster again.
+# Creates the kind cluster patchpanel-e2e, runs the e2e tests and deletes the cluster again.
 e2e: image
 	bash test/e2e/run.sh

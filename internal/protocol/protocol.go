@@ -8,7 +8,7 @@ import (
 	"github.com/containernetworking/cni/pkg/types"
 )
 
-const SocketPath = "/run/dcnet/dcnet.sock"
+const SocketPath = "/run/patchpanel/patchpanel.sock"
 
 // Request is a raw CNI invocation: the environment variables plus the stdin config.
 type Request struct {

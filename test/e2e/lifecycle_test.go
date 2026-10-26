@@ -21,7 +21,7 @@ func TestAgentRestart(t *testing.T) {
 	setIP(t, ns, "leaf2", "192.168.0.2/24")
 	waitPing(t, ns, "leaf1", "192.168.0.2")
 
-	parkBefore, err := command("", "docker", "exec", node, "stat", "-L", "-c", "%i", "/run/netns/dcnet-park")
+	parkBefore, err := command("", "docker", "exec", node, "stat", "-L", "-c", "%i", "/run/netns/patchpanel-park")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -30,14 +30,14 @@ func TestAgentRestart(t *testing.T) {
 		t.Fatalf("want 2 stubs before the restart, got %v", stubsBefore)
 	}
 
-	oldAgent := kubectl(t, "-n", "dcnet-system", "get", "pod", "-l", "app=dcnet-agent", "-o", "jsonpath={.items[0].metadata.name}")
-	kubectl(t, "-n", "dcnet-system", "delete", "pod", oldAgent, "--timeout=120s")
+	oldAgent := kubectl(t, "-n", "patchpanel-system", "get", "pod", "-l", "app=patchpanel-agent", "-o", "jsonpath={.items[0].metadata.name}")
+	kubectl(t, "-n", "patchpanel-system", "delete", "pod", oldAgent, "--timeout=120s")
 
 	// The data plane is the kernel: it forwards without an agent.
 	waitPing(t, ns, "leaf1", "192.168.0.2")
 
 	eventually(t, 120*time.Second, "new agent to be ready", func() error {
-		out, err := kubectlTry("", "-n", "dcnet-system", "get", "pod", "-l", "app=dcnet-agent", "-o",
+		out, err := kubectlTry("", "-n", "patchpanel-system", "get", "pod", "-l", "app=patchpanel-agent", "-o",
 			"jsonpath={.items[0].metadata.name} {.items[0].status.containerStatuses[0].ready}")
 		if err != nil {
 			return err
@@ -49,7 +49,7 @@ func TestAgentRestart(t *testing.T) {
 		return nil
 	})
 
-	parkAfter, err := command("", "docker", "exec", node, "stat", "-L", "-c", "%i", "/run/netns/dcnet-park")
+	parkAfter, err := command("", "docker", "exec", node, "stat", "-L", "-c", "%i", "/run/netns/patchpanel-park")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	kubeContext = "kind-dcnet-e2e"
-	node        = "dcnet-e2e-control-plane"
+	kubeContext = "kind-patchpanel-e2e"
+	node        = "patchpanel-e2e-control-plane"
 	toolsImage  = "nicolaka/netshoot:v0.14"
 	topology    = "lab"
 )
@@ -99,7 +99,7 @@ func newNamespace(t *testing.T, spec string) string {
 	})
 
 	apply(t, fmt.Sprintf(`
-apiVersion: dcnet.squ94wk.github.io/v1alpha1
+apiVersion: patchpanel.squ94wk.github.io/v1alpha1
 kind: Topology
 metadata: {name: %[2]s, namespace: %[1]s}
 spec:
@@ -109,7 +109,7 @@ apiVersion: k8s.cni.cncf.io/v1
 kind: NetworkAttachmentDefinition
 metadata: {name: %[2]s, namespace: %[1]s}
 spec:
-  config: '{"cniVersion": "1.0.0", "name": "%[2]s", "type": "dcnet", "topology": "%[2]s"}'
+  config: '{"cniVersion": "1.0.0", "name": "%[2]s", "type": "patchpanel", "topology": "%[2]s"}'
 `, ns, topology, spec))
 
 	return ns
@@ -121,13 +121,13 @@ func dump(t *testing.T, ns string) {
 	for _, args := range [][]string{
 		{"-n", ns, "get", "pods,deviceassociations", "-o", "wide"},
 		{"-n", ns, "get", "events"},
-		{"-n", "dcnet-system", "logs", "ds/dcnet-agent", "--tail=60"},
+		{"-n", "patchpanel-system", "logs", "ds/patchpanel-agent", "--tail=60"},
 	} {
 		out, _ := kubectlTry("", args...)
 		t.Logf("kubectl %s:\n%s", strings.Join(args, " "), out)
 	}
 
-	out, _ := command("", "docker", "exec", node, "ip", "-n", "dcnet-park", "-d", "link")
+	out, _ := command("", "docker", "exec", node, "ip", "-n", "patchpanel-park", "-d", "link")
 	t.Logf("park links:\n%s", out)
 }
 
@@ -215,7 +215,7 @@ func waitPing(t *testing.T, ns, pod, ip string) {
 func stubAliases(t *testing.T, ns string) []string {
 	t.Helper()
 
-	out, err := command("", "docker", "exec", node, "ip", "-n", "dcnet-park", "-o", "link", "show")
+	out, err := command("", "docker", "exec", node, "ip", "-n", "patchpanel-park", "-o", "link", "show")
 	if err != nil {
 		t.Fatal(err)
 	}

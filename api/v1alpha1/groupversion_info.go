@@ -1,5 +1,5 @@
 // +kubebuilder:object:generate=true
-// +groupName=dcnet.squ94wk.github.io
+// +groupName=patchpanel.squ94wk.github.io
 package v1alpha1
 
 import (
@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	GroupVersion  = schema.GroupVersion{Group: "dcnet.squ94wk.github.io", Version: "v1alpha1"}
+	GroupVersion  = schema.GroupVersion{Group: "patchpanel.squ94wk.github.io", Version: "v1alpha1"}
 	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
 	AddToScheme   = SchemeBuilder.AddToScheme
 )

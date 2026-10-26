@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.22.0
-  name: topologies.dcnet.squ94wk.github.io
+  name: topologies.patchpanel.squ94wk.github.io
 spec:
-  group: dcnet.squ94wk.github.io
+  group: patchpanel.squ94wk.github.io
   names:
     kind: Topology
     listKind: TopologyList

@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: dcnet-agent
+  name: patchpanel-agent
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:
-      app: dcnet-agent
+      app: patchpanel-agent
   template:
     metadata:
       labels:
-        app: dcnet-agent
+        app: patchpanel-agent
     spec:
-      serviceAccountName: dcnet-agent
+      serviceAccountName: patchpanel-agent
       priorityClassName: system-node-critical
       tolerations:
         - operator: Exists
@@ -23,7 +23,7 @@ spec:
           command:
             - sh
             - -c
-            - cp /usr/local/bin/dcnet /opt/cni/bin/dcnet.tmp && mv /opt/cni/bin/dcnet.tmp /opt/cni/bin/dcnet
+            - cp /usr/local/bin/patchpanel /opt/cni/bin/patchpanel.tmp && mv /opt/cni/bin/patchpanel.tmp /opt/cni/bin/patchpanel
           volumeMounts:
             - name: cni-bin
               mountPath: /opt/cni/bin
@@ -44,7 +44,7 @@ spec:
               mountPath: /run/netns
               mountPropagation: Bidirectional
             - name: socket
-              mountPath: /run/dcnet
+              mountPath: /run/patchpanel
       volumes:
         - name: cni-bin
           hostPath:
@@ -56,5 +56,5 @@ spec:
             type: DirectoryOrCreate
         - name: socket
           hostPath:
-            path: /run/dcnet
+            path: /run/patchpanel
             type: DirectoryOrCreate

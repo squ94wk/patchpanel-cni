@@ -18,8 +18,8 @@ import (
 )
 
 const (
-	PodUIDLabel = "dcnet.squ94wk.github.io/pod-uid"
-	Finalizer   = "dcnet.squ94wk.github.io/cleanup"
+	PodUIDLabel = "patchpanel.squ94wk.github.io/pod-uid"
+	Finalizer   = "patchpanel.squ94wk.github.io/cleanup"
 	MTU         = 9000
 )
 
