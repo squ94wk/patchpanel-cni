@@ -135,6 +135,13 @@ func dump(t *testing.T, ns string) {
 func startPod(t *testing.T, ns, name, cniArgs string) {
 	t.Helper()
 
+	startPodNetworks(t, ns, name, fmt.Sprintf(`[{"name": "%s", "cni-args": %s}]`, topology, cniArgs))
+}
+
+// startPodNetworks creates a pod with a raw k8s.v1.cni.cncf.io/networks annotation.
+func startPodNetworks(t *testing.T, ns, name, networks string) {
+	t.Helper()
+
 	apply(t, fmt.Sprintf(`
 apiVersion: v1
 kind: Pod
@@ -142,17 +149,34 @@ metadata:
   name: %[2]s
   namespace: %[1]s
   annotations:
-    k8s.v1.cni.cncf.io/networks: '[{"name": "%[4]s", "cni-args": %[3]s}]'
+    k8s.v1.cni.cncf.io/networks: '%[3]s'
 spec:
   terminationGracePeriodSeconds: 0
   containers:
     - name: main
-      image: %[5]s
+      image: %[4]s
       imagePullPolicy: IfNotPresent
       command: [sleep, infinity]
       securityContext:
         privileged: true
-`, ns, name, cniArgs, topology, toolsImage))
+`, ns, name, networks, toolsImage))
+}
+
+// portNAD creates the NetworkAttachmentDefinition of one port of a device and returns its name.
+func portNAD(t *testing.T, ns, device, iface string) string {
+	t.Helper()
+
+	name := fmt.Sprintf("%s-%s-%s", topology, device, iface)
+
+	apply(t, fmt.Sprintf(`
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata: {name: %[2]s, namespace: %[1]s}
+spec:
+  config: '{"cniVersion": "1.0.0", "name": "%[2]s", "type": "patchpanel", "topology": "%[3]s", "args": {"cni": {"device": "%[4]s", "interface": "%[5]s"}}}'
+`, ns, name, topology, device, iface))
+
+	return name
 }
 
 func waitReady(t *testing.T, ns, name string) {

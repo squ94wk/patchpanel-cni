@@ -1,0 +1,67 @@
+# One NetworkAttachmentDefinition per port: a KubeVirt interface attaches to exactly one network.
+# Each ADD creates only the selected port and names it after CNI_IFNAME.
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: lab1-leaf1-eth1
+spec:
+  config: |
+    {
+      "cniVersion": "1.0.0",
+      "name": "lab1-leaf1-eth1",
+      "type": "patchpanel",
+      "topology": "lab1",
+      "args": {"cni": {"device": "leaf1", "interface": "eth1"}}
+    }
+
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: lab1-leaf1-eth2
+spec:
+  config: |
+    {
+      "cniVersion": "1.0.0",
+      "name": "lab1-leaf1-eth2",
+      "type": "patchpanel",
+      "topology": "lab1",
+      "args": {"cni": {"device": "leaf1", "interface": "eth2"}}
+    }
+
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: leaf1
+spec:
+  runStrategy: Always
+  template:
+    spec:
+      # Live migration is unsupported: the target pod would be a second pod claiming the device.
+      evictionStrategy: None
+      domain:
+        devices:
+          interfaces:
+            - name: default
+              masquerade: {}
+            - name: eth1
+              bridge: {}
+            - name: eth2
+              bridge: {}
+        resources:
+          requests:
+            memory: 1Gi
+      networks:
+        - name: default
+          pod: {}
+        - name: eth1
+          multus:
+            networkName: lab1-leaf1-eth1
+        - name: eth2
+          multus:
+            networkName: lab1-leaf1-eth2
+      volumes:
+        - name: rootdisk
+          containerDisk:
+            image: quay.io/kubevirt/alpine-container-disk-demo

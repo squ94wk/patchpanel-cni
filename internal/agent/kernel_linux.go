@@ -14,16 +14,16 @@ import (
 )
 
 // createPort creates the veth pair of a port: the stub stays in the park netns and
-// the other end lands in the pod netns under its topology name. Both ends are created down,
+// the other end lands in the pod netns as podIfName. Both ends are created down,
 // the pod side is brought up so that the pod sees carrier as soon as the port is wired.
-func createPort(park *netlink.Handle, podNs netns.NsHandle, pod *netlink.Handle, p topo.Port) error {
+func createPort(park *netlink.Handle, podNs netns.NsHandle, pod *netlink.Handle, p topo.Port, podIfName string) error {
 	stub := topo.StubName(p.Local)
 
 	var veth netlink.Veth
 	veth.Name = stub
 	veth.MTU = MTU
 	veth.TxQLen = -1
-	veth.PeerName = p.Local.Interface
+	veth.PeerName = podIfName
 	veth.PeerMTU = MTU
 	veth.PeerTxQLen = -1
 	veth.PeerHardwareAddr = topo.MAC(p.Local)
@@ -31,7 +31,7 @@ func createPort(park *netlink.Handle, podNs netns.NsHandle, pod *netlink.Handle,
 
 	err := park.LinkAdd(&veth)
 	if err != nil {
-		return fmt.Errorf("failed to create interface %q in pod: %w", p.Local.Interface, err)
+		return fmt.Errorf("failed to create interface %q in pod: %w", podIfName, err)
 	}
 
 	stubLink, err := park.LinkByName(stub)
@@ -44,14 +44,14 @@ func createPort(park *netlink.Handle, podNs netns.NsHandle, pod *netlink.Handle,
 		return fmt.Errorf("failed to set alias on stub for interface %q: %w", p.Local.Interface, err)
 	}
 
-	podLink, err := pod.LinkByName(p.Local.Interface)
+	podLink, err := pod.LinkByName(podIfName)
 	if err != nil {
-		return fmt.Errorf("failed to look up interface %q in pod: %w", p.Local.Interface, err)
+		return fmt.Errorf("failed to look up interface %q in pod: %w", podIfName, err)
 	}
 
 	err = pod.LinkSetUp(podLink)
 	if err != nil {
-		return fmt.Errorf("failed to set interface %q up in pod: %w", p.Local.Interface, err)
+		return fmt.Errorf("failed to set interface %q up in pod: %w", podIfName, err)
 	}
 
 	return nil

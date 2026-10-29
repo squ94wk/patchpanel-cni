@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	types100 "github.com/containernetworking/cni/pkg/types/100"
 	"github.com/containernetworking/cni/pkg/types/create"
 
 	"github.com/squ94wk/patchpanel-cni/internal/agent"
@@ -16,10 +17,14 @@ func TestBuildResult(t *testing.T) {
 		{Local: topo.Endpoint{Namespace: "ns", Topology: "lab", Device: "leaf1", Interface: "eth1"}},
 		{Local: topo.Endpoint{Namespace: "ns", Topology: "lab", Device: "leaf1", Interface: "eth2"}},
 	}
+	var ifaces []*types100.Interface
+	for _, p := range ports {
+		ifaces = append(ifaces, &types100.Interface{Name: p.Local.Interface, Mac: topo.MAC(p.Local).String(), Sandbox: netns})
+	}
 
 	for _, version := range []string{"1.0.0", "0.4.0", "0.3.1"} {
 		t.Run(version, func(t *testing.T) {
-			out, err := agent.BuildResult(version, netns, ports)
+			out, err := agent.BuildResult(version, ifaces)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -62,7 +67,7 @@ func TestBuildResult(t *testing.T) {
 }
 
 func TestBuildResultUnsupportedVersion(t *testing.T) {
-	_, err := agent.BuildResult("9.9.9", "/x", nil)
+	_, err := agent.BuildResult("9.9.9", nil)
 	if err == nil {
 		t.Fatal("want error for unsupported version")
 	}

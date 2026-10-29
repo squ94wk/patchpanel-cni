@@ -5,20 +5,12 @@ import (
 	"fmt"
 
 	types100 "github.com/containernetworking/cni/pkg/types/100"
-
-	"github.com/squ94wk/patchpanel-cni/internal/topo"
 )
 
-// BuildResult returns the CNI result in cniVersion. Every interface has the sandbox set, otherwise multus drops it.
-func BuildResult(cniVersion, netns string, ports []topo.Port) ([]byte, error) {
-	result := types100.Result{CNIVersion: types100.ImplementedSpecVersion}
-	for _, p := range ports {
-		result.Interfaces = append(result.Interfaces, &types100.Interface{
-			Name:    p.Local.Interface,
-			Mac:     topo.MAC(p.Local).String(),
-			Sandbox: netns,
-		})
-	}
+// BuildResult returns the CNI result in cniVersion for the interfaces an Add created.
+// Every interface must have the sandbox set, otherwise multus drops it.
+func BuildResult(cniVersion string, interfaces []*types100.Interface) ([]byte, error) {
+	result := types100.Result{CNIVersion: types100.ImplementedSpecVersion, Interfaces: interfaces}
 
 	converted, err := result.GetAsVersion(cniVersion)
 	if err != nil {

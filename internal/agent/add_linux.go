@@ -6,7 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 
+	types100 "github.com/containernetworking/cni/pkg/types/100"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -18,8 +20,8 @@ import (
 	"github.com/squ94wk/patchpanel-cni/internal/topo"
 )
 
-// Add claims a device of the topology for the pod, creates its ports and wires them to the existing peers.
-// It is all-or-nothing and recreates the ports if the same sandbox is added again.
+// Add claims a device of the topology for the pod, creates its ports (or only the selected port) and wires them to the existing peers.
+// A failed Add removes the ports it created and a repeated Add recreates the ports it creates.
 func (a *Agent) Add(ctx context.Context, inv Invocation) (result []byte, err error) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -47,6 +49,9 @@ func (a *Agent) Add(ctx context.Context, inv Invocation) (result []byte, err err
 		}
 		if inv.Device != "" && inv.Device != h.Spec.Device {
 			return nil, fmt.Errorf("failed to claim device %q: pod already holds device %q of Topology %s", inv.Device, h.Spec.Device, inv.Topology)
+		}
+		if inv.Device == "" && !slices.Contains(candidates, h.Spec.Device) {
+			return nil, fmt.Errorf("failed to claim a device of group %q: pod already holds device %q of Topology %s, which is not a member", inv.Group, h.Spec.Device, inv.Topology)
 		}
 		candidates = []string{h.Spec.Device}
 	}
@@ -103,18 +108,20 @@ func (a *Agent) Add(ctx context.Context, inv Invocation) (result []byte, err err
 		return nil, errors.New("failed to claim a free device: all candidates are held by other pods")
 	}
 
-	// Rollback on failure. Stubs are removed by name, because a stub that failed before its alias was set cannot be found by alias.
+	// Rollback on failure removes only the stubs this Add created: the sandbox may hold ports of earlier Adds.
+	// Stubs are removed by name, because a stub that failed before its alias was set cannot be found by alias.
 	var ports []topo.Port
+	var createdStubs []string
 	defer func() {
 		if err == nil {
 			return
 		}
 
 		var rollbackErrs []error
-		for _, p := range ports {
-			delErr := deleteStub(a.ParkLinks, topo.StubName(p.Local))
+		for _, stub := range createdStubs {
+			delErr := deleteStub(a.ParkLinks, stub)
 			if delErr != nil {
-				rollbackErrs = append(rollbackErrs, fmt.Errorf("failed to roll back stub of interface %q: %w", p.Local.Interface, delErr))
+				rollbackErrs = append(rollbackErrs, fmt.Errorf("failed to roll back stub %s: %w", stub, delErr))
 			}
 		}
 		delErr := reconcileDangling(a.ParkLinks)
@@ -145,9 +152,13 @@ func (a *Agent) Add(ctx context.Context, inv Invocation) (result []byte, err err
 		return nil, fmt.Errorf("failed to record node and sandbox in DeviceAssociation status: %w", err)
 	}
 
-	err = cleanupDevice(a.ParkLinks, topo.Endpoint{Namespace: inv.Namespace, Topology: inv.Topology, Device: da.Spec.Device})
-	if err != nil {
-		return nil, fmt.Errorf("failed to remove previous ports of device %q: %w", da.Spec.Device, err)
+	// Port mode: one Add creates only the selected port, the sandbox's other ports belong to other Adds.
+	if inv.Interface != "" {
+		i := slices.IndexFunc(ports, func(p topo.Port) bool { return p.Local.Interface == inv.Interface })
+		if i < 0 {
+			return nil, fmt.Errorf("failed to find interface %q on device %q in Topology %s/%s", inv.Interface, da.Spec.Device, inv.Namespace, inv.Topology)
+		}
+		ports = []topo.Port{ports[i]}
 	}
 
 	podNs, err := netns.GetFromPath(inv.Netns)
@@ -162,11 +173,28 @@ func (a *Agent) Add(ctx context.Context, inv Invocation) (result []byte, err err
 	}
 	defer pod.Close()
 
+	var ifaces []*types100.Interface
 	for _, p := range ports {
-		err = createPort(a.ParkLinks, podNs, pod, p)
+		// Device mode names the pod side after the topology interface, port mode after CNI_IFNAME.
+		podIfName := p.Local.Interface
+		if inv.Interface != "" {
+			podIfName = inv.IfName
+		}
+
+		// Remove a stub left by an earlier Add of this port, e.g. one whose sandbox was lost without a DEL.
+		stub := topo.StubName(p.Local)
+		err = deleteStub(a.ParkLinks, stub)
+		if err != nil {
+			return nil, fmt.Errorf("failed to remove previous stub of interface %q: %w", p.Local.Interface, err)
+		}
+
+		createdStubs = append(createdStubs, stub)
+		err = createPort(a.ParkLinks, podNs, pod, p, podIfName)
 		if err != nil {
 			return nil, err
 		}
+
+		ifaces = append(ifaces, &types100.Interface{Name: podIfName, Mac: topo.MAC(p.Local).String(), Sandbox: inv.Netns})
 	}
 
 	for _, p := range ports {
@@ -199,5 +227,5 @@ func (a *Agent) Add(ctx context.Context, inv Invocation) (result []byte, err err
 		return nil, fmt.Errorf("failed to unwire dangling stubs: %w", err)
 	}
 
-	return BuildResult(inv.CNIVersion, inv.Netns, ports)
+	return BuildResult(inv.CNIVersion, ifaces)
 }

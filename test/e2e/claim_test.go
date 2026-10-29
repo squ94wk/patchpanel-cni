@@ -65,6 +65,20 @@ func TestGroupClaim(t *testing.T) {
 	}
 }
 
+// A group request must not reuse a held device that is not a member of the group.
+func TestGroupRequestWithHeldDeviceOutsideGroup(t *testing.T) {
+	ns := newNamespace(t, serverGroup)
+
+	startPodNetworks(t, ns, "p1", fmt.Sprintf(
+		`[{"name": "%[1]s", "cni-args": {"device": "sw"}}, {"name": "%[1]s", "cni-args": {"group": "servers"}}]`, topology))
+	waitEvent(t, ns, "p1", "Failed to create pod sandbox")
+
+	held := holders(t, ns)
+	if len(held) > 1 || (len(held) == 1 && held["sw"] != "p1") {
+		t.Fatalf("group request claimed a device outside the group: %v", held)
+	}
+}
+
 func TestExclusiveDevice(t *testing.T) {
 	ns := newNamespace(t, twoLeaves)
 

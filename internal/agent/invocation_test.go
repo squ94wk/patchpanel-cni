@@ -48,6 +48,27 @@ func TestParseInvocationAddDeviceAndGroup(t *testing.T) {
 	}
 }
 
+func TestParseInvocationAddPort(t *testing.T) {
+	req := addRequest(`{"cniVersion":"1.0.0","topology":"lab","args":{"cni":{"device":"leaf1","interface":"eth1"}}}`, podArgs)
+	req.IfName = "pod0123456789a"
+
+	inv, err := agent.ParseInvocation(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if inv.Device != "leaf1" || inv.Interface != "eth1" || inv.IfName != "pod0123456789a" {
+		t.Fatalf("got %+v", inv)
+	}
+}
+
+func TestParseInvocationAddInterfaceWithoutDevice(t *testing.T) {
+	_, err := agent.ParseInvocation(addRequest(
+		`{"topology":"lab","args":{"cni":{"group":"servers","interface":"eth1"}}}`, podArgs))
+	if err == nil {
+		t.Fatal("want error when interface is set with a group")
+	}
+}
+
 func TestParseInvocationAddNeitherDeviceNorGroup(t *testing.T) {
 	_, err := agent.ParseInvocation(addRequest(`{"topology":"lab"}`, podArgs))
 	if err == nil {
@@ -90,6 +111,19 @@ func TestParseInvocationDelNeedsOnlyTopology(t *testing.T) {
 		t.Fatal(err)
 	}
 	if inv.Topology != "lab" || inv.PodUID != "uid1" {
+		t.Fatalf("got %+v", inv)
+	}
+}
+
+func TestParseInvocationDelCarriesInterface(t *testing.T) {
+	inv, err := agent.ParseInvocation(protocol.Request{
+		Command: "DEL", ContainerID: "abc", Args: "K8S_POD_UID=uid1",
+		Stdin: []byte(`{"topology":"lab","args":{"cni":{"device":"leaf1","interface":"eth1"}}}`),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if inv.Device != "leaf1" || inv.Interface != "eth1" {
 		t.Fatalf("got %+v", inv)
 	}
 }

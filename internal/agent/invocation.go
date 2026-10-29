@@ -17,6 +17,8 @@ type Invocation struct {
 	Topology    string
 	Device      string
 	Group       string
+	Interface   string
+	IfName      string
 	Namespace   string
 	PodName     string
 	PodUID      string
@@ -27,13 +29,14 @@ type netConf struct {
 	Topology   string `json:"topology"`
 	Args       struct {
 		CNI struct {
-			Device string `json:"device"`
-			Group  string `json:"group"`
+			Device    string `json:"device"`
+			Group     string `json:"group"`
+			Interface string `json:"interface"`
 		} `json:"cni"`
 	} `json:"args"`
 }
 
-// ParseInvocation reads the topology and the device or group from the stdin config and the pod identity from CNI_ARGS.
+// ParseInvocation reads the topology and the device or group, optionally with a single interface of the device, from the stdin config and the pod identity from CNI_ARGS.
 // DEL only needs the topology and the pod UID and succeeds without them: there is nothing to clean up.
 func ParseInvocation(r protocol.Request) (Invocation, error) {
 	var conf netConf
@@ -50,6 +53,8 @@ func ParseInvocation(r protocol.Request) (Invocation, error) {
 		Topology:    conf.Topology,
 		Device:      conf.Args.CNI.Device,
 		Group:       conf.Args.CNI.Group,
+		Interface:   conf.Args.CNI.Interface,
+		IfName:      r.IfName,
 	}
 
 	for kv := range strings.SplitSeq(r.Args, ";") {
@@ -78,6 +83,10 @@ func ParseInvocation(r protocol.Request) (Invocation, error) {
 
 	if (inv.Device == "") == (inv.Group == "") {
 		return Invocation{}, errors.New("failed to select a device: set exactly one of \"device\" and \"group\" in cni-args")
+	}
+
+	if inv.Interface != "" && inv.Device == "" {
+		return Invocation{}, errors.New("failed to select a port: \"interface\" requires \"device\" in cni-args")
 	}
 
 	return inv, nil
